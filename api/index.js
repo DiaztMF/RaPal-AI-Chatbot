@@ -81,8 +81,11 @@ export default async function handler(req, res) {
     return;
   }
 
+  // Parse URL path
+  const path = req.url?.split('?')[0] || '';
+  
   // Health check endpoint
-  if (req.url === '/api/health' || req.url === '/api') {
+  if (path.includes('/health') || (req.method === 'GET' && path === '/api')) {
     return res.status(200).json({ 
       status: "OK", 
       timestamp: new Date().toISOString(),
@@ -91,7 +94,7 @@ export default async function handler(req, res) {
   }
 
   // Chat endpoint
-  if (req.method === 'POST' && (req.url === '/api/chat' || req.url === '/api')) {
+  if (req.method === 'POST' && (path.includes('/chat') || path === '/api')) {
     try {
       const { message, sessionId = "default" } = req.body;
 
@@ -181,6 +184,6 @@ export default async function handler(req, res) {
   // 404 for other routes
   return res.status(404).json({ 
     error: "Endpoint tidak ditemukan",
-    path: req.url 
+    path: path
   });
 }
