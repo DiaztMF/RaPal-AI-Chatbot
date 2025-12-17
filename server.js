@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
@@ -25,7 +25,7 @@ if (!process.env.GEMINI_API_KEY) {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
+  model: "gemini-1.5-flash",
   systemInstruction: `
 PERAN KAMU:
 Kamu adalah chatbot resmi jurusan RPL (Rekayasa Perangkat Lunak)
@@ -231,12 +231,14 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`✅ Server RAPal AI berjalan di http://localhost:${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`🤖 Model: gemini-2.5-flash`);
-});
+// Start server (hanya untuk local development)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`✅ Server RAPal AI berjalan di http://localhost:${PORT}`);
+    console.log(`📊 Health check: http://localhost:${PORT}/health`);
+    console.log(`🤖 Model: gemini-1.5-flash`);
+  });
+}
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
@@ -250,3 +252,6 @@ process.on('SIGINT', () => {
   chatSessions.clear();
   process.exit(0);
 });
+
+// Export untuk Vercel (serverless)
+export default app;
